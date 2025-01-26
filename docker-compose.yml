@@ -1,0 +1,37 @@
+services:
+  member_db:
+    image: mysql:8.0
+    container_name: member_db
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: member
+      MYSQL_USER: member
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      TZ: Asia/Seoul
+    ports:
+      - "3307:3306"
+    volumes:
+      - member_db_data:/var/lib/mysql
+    networks:
+      - app-network
+
+  member_spring:
+    build: .
+    container_name: member_spring
+    depends_on:
+      - member_db
+    environment:
+      TZ: Asia/Seoul
+      DATABASE_URL: mysql://member:${MYSQL_PASSWORD}@member_db:3306/member
+    ports:
+      - "8081:8080"
+    networks:
+      - app-network
+
+volumes:
+  member_db_data:
+    driver: local
+
+networks:
+  app-network:
+    driver: bridge
